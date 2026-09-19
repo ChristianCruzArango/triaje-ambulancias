@@ -1,0 +1,90 @@
+<app-modal
+  title="Cómo se eligió el hospital"
+  [subtitle]="'Calculado en ' + (emergency().dispatchLatencyMs ?? 0) + ' ms · sin llamadas a ninguna IA'"
+  (closed)="closed.emit()">
+
+  <!-- ── 1. LA ENTRADA ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">1 · Lo que recibe el despacho</h3>
+    <p class="ins-note">
+      Jev ya respondió. Lo único que aporta a esta decisión es
+      <b>{{ emergency().assessment?.requiredCapabilityLabel }}</b>
+      @if (capabilityProbability() !== null) {
+        , con {{ capabilityProbability()! | percent:'1.0-0' }} de probabilidad
+      }. Todo lo demás son coordenadas y reglas.
+    </p>
+    <pre class="ins-code">{{ inputJson() }}</pre>
+  </section>
+
+  <!-- ── 2. EL ALGORITMO ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">2 · Qué hace con eso</h3>
+    <pre class="ins-code ins-code--highlight">1. Para cada uno de los {{ candidates().length }} hospitales:
+     distancia = haversine(incidente, hospital)
+     apto      = tiene la capacidad requerida Y camas &gt; 0
+
+2. Ordenar por distancia, de menor a mayor
+
+3. Elegido = el primero que sea apto
+     → {{ emergency().hospitalName ?? '—' }}
+
+4. Si el primero de la lista NO es el elegido,
+   guardar por qué se descartó  → nearestOverruled</pre>
+    <p class="ins-note">
+      <b>Nada de esto se le pregunta a Jev.</b> Comparar distancias es
+      aritmética, y la documentación de TypeSafe advierte que jev-1.13 no
+      compara magnitudes numéricas de forma fiable. Por eso vive en código, en
+      <code>backend/src/dispatch/dispatch.service.ts</code>.
+    </p>
+  </section>
+
+  <!-- ── 3. EL FILTRO, CON DATOS ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">3 · El filtro, con los datos de este caso</h3>
+    <div class="split">
+      <div class="col col--ok">
+        <span class="col__tag">{{ eligible().length }} aptos</span>
+        @for (c of eligible(); track c.code) {
+          <p class="col__row">
+            <b>{{ c.distanceKm | number:'1.2-2' }} km</b> {{ c.name }}
+          </p>
+        }
+      </div>
+      <div class="col col--ko">
+        <span class="col__tag">{{ rejected().length }} descartados</span>
+        @for (c of rejected(); track c.code) {
+          <p class="col__row">
+            <b>{{ c.distanceKm | number:'1.2-2' }} km</b> {{ c.name }}
+            <em>{{ c.rejectedReason }}</em>
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. LA SALIDA ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">4 · Lo que devuelve</h3>
+    <pre class="ins-code">{{ outputJson() }}</pre>
+  </section>
+
+  <!-- ── 5. LÍMITES ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">5 · Lo que este cálculo NO hace</h3>
+    <ul class="limits">
+      <li>
+        Mide <b>línea recta</b>, no calles. Para rutas por carretera haría falta
+        la Directions API de Google, que se factura por petición.
+      </li>
+      <li>
+        No conoce el tráfico ni los cierres viales. El tiempo estimado asume una
+        velocidad media urbana fija.
+      </li>
+      <li>
+        Las capacidades y las camas de cada hospital son <b>datos de
+        demostración</b>, no información verificada. En un sistema real vendrían
+        del sistema de cada institución.
+      </li>
+    </ul>
+  </section>
+</app-modal>

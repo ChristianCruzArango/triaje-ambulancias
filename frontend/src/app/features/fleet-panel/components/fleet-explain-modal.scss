@@ -1,0 +1,37 @@
+.callout {
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #fcd34d;
+}
+
+.reasons {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+
+  li {
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #94a3b8;
+  }
+
+  b { color: #e2e8f0; }
+
+  code {
+    padding: 0 0.2rem;
+    border-radius: 3px;
+    background: rgba(148, 163, 184, 0.14);
+    font-size: 0.6875rem;
+    color: #cbd5e1;
+  }
+
+  em {
+    display: block;
+    margin-top: 0.15rem;
+    font-style: normal;
+    font-size: 0.6875rem;
+    color: #7dd3fc;
+  }
+}

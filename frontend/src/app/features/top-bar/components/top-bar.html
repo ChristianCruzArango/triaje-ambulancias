@@ -1,0 +1,34 @@
+<div class="bar__left">
+  <span class="demo">DEMOSTRACIÓN · datos simulados</span>
+  <span class="conn" [class.conn--on]="connected()">
+    <i></i>{{ connected() ? 'En vivo' : (apiDown() ? 'Sin backend' : 'Reconectando…') }}
+  </span>
+  <span class="count">{{ active().length }} activas</span>
+  @if (review() > 0) {
+    <span class="count count--review">{{ review() }} en revisión</span>
+  }
+</div>
+
+<div class="bar__stats">
+  @if (stats(); as s) {
+    <span class="stat">
+      <b>Jev</b>
+      {{ s.jev.calls | number }} llamadas ·
+      {{ s.jev.totalCostUsd | cost }} ·
+      {{ s.jev.avgLatencyMs | number }} ms
+    </span>
+    <span class="stat stat--win">
+      <b>Despacho</b>
+      {{ s.dispatch.overruledNearest | number }} de {{ s.dispatch.total | number }}
+      no fueron al más cercano ·
+      {{ s.dispatch.avgLatencyMs | number }} ms
+    </span>
+  }
+</div>
+
+<div class="bar__actions">
+  <button type="button" (click)="redeploy()">Redistribuir flota</button>
+  <button type="button" class="btn--toggle" (click)="togglePause()">
+    {{ simulator()?.paused ? 'Reanudar' : 'Pausar' }}
+  </button>
+</div>

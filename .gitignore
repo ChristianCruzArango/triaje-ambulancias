@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────────────────────
+# Dependencias y compilados
+# ─────────────────────────────────────────────────────────────
+node_modules/
+dist/
+build/
+.angular/
+coverage/
+*.tsbuildinfo
+
+# ─────────────────────────────────────────────────────────────
+# SECRETOS — nunca se suben
+# ─────────────────────────────────────────────────────────────
+
+# Claves de TypeSafe y OpenRouter, y credenciales de la base
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# La clave de Google Maps vive en estos archivos, que son código fuente.
+# Se versionan solo las plantillas `*.example.ts`.
+frontend/src/environments/environment.ts
+frontend/src/environments/environment.production.ts
+
+# ─────────────────────────────────────────────────────────────
+# Herramientas locales de desarrollo — no forman parte del proyecto
+# ─────────────────────────────────────────────────────────────
+.claude/
+CLAUDE.md
+.chalc/
+.chalc.json
+.cursor/
+.vscode/
+.idea/
+
+# ─────────────────────────────────────────────────────────────
+# Sistema operativo y editores
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*

@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: triaje-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-triaje}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-triaje}
+      POSTGRES_DB: ${POSTGRES_DB:-triaje}
+    ports:
+      - '${POSTGRES_PORT:-5435}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-triaje} -d ${POSTGRES_DB:-triaje}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: triaje-adminer
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${ADMINER_PORT:-8080}:8080'
+
+volumes:
+  postgres-data:

@@ -1,0 +1,68 @@
+/**
+ * El `<dialog>` ocupa la ventana completa. Se anulan los valores por defecto
+ * del navegador (margen automático, ancho ajustado al contenido, borde).
+ */
+.dialog {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: #0d1729;
+  color: #e2e8f0;
+
+  &::backdrop {
+    background: rgba(2, 6, 14, 0.85);
+  }
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.6rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(2, 6, 14, 0.5);
+  }
+
+  &__title { margin: 0; font-size: 1.1rem; font-weight: 700; color: #f1f5f9; }
+  &__sub { margin: 0.2rem 0 0; font-size: 0.75rem; color: #7dd3fc; }
+
+  &__close {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 6px;
+    background: transparent;
+    color: #94a3b8;
+    font: 600 0.75rem system-ui, sans-serif;
+    cursor: pointer;
+    padding: 0.4rem 0.7rem;
+    white-space: nowrap;
+    &:hover { background: rgba(148, 163, 184, 0.16); color: #f1f5f9; }
+  }
+
+  /**
+   * Dos columnas cuando hay ancho: el JSON necesita espacio, pero una línea
+   * de texto de 1.800 px no se lee.
+   */
+  &__body {
+    flex: 1;
+    padding: 1.4rem 1.6rem 2.5rem;
+    overflow-y: auto;
+    columns: 2;
+    column-gap: 2.8rem;
+
+    > * { break-inside: avoid; }
+  }
+}
+
+@media (max-width: 1100px) {
+  .sheet__body { columns: 1; }
+}

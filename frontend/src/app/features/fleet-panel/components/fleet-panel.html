@@ -1,0 +1,69 @@
+@if (emergency(); as e) {
+  @if (rows().length) {
+    <!-- ── EXTREMOS ── -->
+    <div class="ends">
+      @if (nearest(); as n) {
+        <div class="end end--near">
+          <span class="end__tag">Más cercana</span>
+          <span class="end__code">{{ n.ambulance.code }}</span>
+          <span class="end__km">{{ n.distanceKm | number:'1.2-2' }} km</span>
+          <span class="end__eta">≈ {{ n.etaMinutes }} min</span>
+        </div>
+      }
+      @if (farthest(); as f) {
+        <div class="end end--far">
+          <span class="end__tag">Más lejana</span>
+          <span class="end__code">{{ f.ambulance.code }}</span>
+          <span class="end__km">{{ f.distanceKm | number:'1.2-2' }} km</span>
+          <span class="end__eta">≈ {{ f.etaMinutes }} min</span>
+        </div>
+      }
+    </div>
+
+    <!-- ── LA FLOTA COMPLETA ── -->
+    <p class="tip">
+      Tocá una unidad para seguirla en el mapa.
+      <button type="button" class="explain-btn" (click)="modalOpen.set(true)">
+        ¿cómo se mide la distancia?
+      </button>
+    </p>
+    <ul class="fleet">
+      @for (r of rows(); track r.ambulance.id) {
+        <li class="unit"
+            [class.unit--assigned]="r.isAssigned"
+            [class.unit--followed]="r.ambulance.id === followedId()"
+            [class.unit--busy]="r.ambulance.status !== 'disponible' && !r.isAssigned"
+            (click)="follow(r.ambulance.id)"
+            [title]="r.ambulance.id === followedId() ? 'Dejar de seguirla' : 'Seguirla en el mapa'">
+          <span class="unit__km">{{ r.distanceKm | number:'1.2-2' }}</span>
+          <span class="unit__body">
+            <span class="unit__code">
+              {{ r.ambulance.code }}
+              <em>{{ r.ambulance.type === 'TAM' ? 'medicalizada' : 'básica' }}</em>
+            </span>
+            <span class="unit__status">{{ statusLabels[r.ambulance.status] }}</span>
+          </span>
+          @if (r.ambulance.id === followedId()) {
+            <span class="unit__mark unit__mark--follow">siguiendo ●</span>
+          } @else if (r.isAssigned) {
+            <span class="unit__mark unit__mark--ok">despachada</span>
+          } @else if (r.ambulance.status !== 'disponible') {
+            <span class="unit__mark unit__mark--busy">ocupada</span>
+          } @else {
+            <span class="unit__mark">≈ {{ r.etaMinutes }} min</span>
+          }
+        </li>
+      }
+    </ul>
+    @if (modalOpen()) {
+      <app-fleet-explain-modal
+        [emergency]="e"
+        [rows]="rows()"
+        (closed)="modalOpen.set(false)" />
+    }
+  } @else {
+    <p class="empty">Sin flota que mostrar.</p>
+  }
+} @else {
+  <p class="empty">Seleccioná una emergencia para ver la flota.</p>
+}

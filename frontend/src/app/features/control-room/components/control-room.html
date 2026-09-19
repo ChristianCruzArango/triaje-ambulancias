@@ -1,0 +1,21 @@
+<app-live-map />
+
+<header class="panel panel--top"><app-top-bar /></header>
+
+<aside class="panel panel--left">
+  <h2 class="panel__title">Consola de llamadas</h2>
+  <app-call-console />
+
+  <h2 class="panel__title panel__title--divider">Emergencias</h2>
+  <app-emergencies-list />
+
+  <h2 class="panel__title panel__title--divider">Flota · distancia al incidente</h2>
+  <app-fleet-panel />
+</aside>
+
+<aside class="panel panel--right">
+  <app-jev-inspector />
+  <div class="panel__divider"></div>
+  <h2 class="panel__title">Despacho</h2>
+  <app-dispatch-panel />
+</aside>

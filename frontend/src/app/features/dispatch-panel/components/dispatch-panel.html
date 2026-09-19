@@ -1,0 +1,104 @@
+@if (emergency(); as e) {
+  @if (capability(); as cap) {
+    <!-- ── LA CADENA DE DECISIÓN ── -->
+    <ol class="chain">
+      <li class="step">
+        <span class="step__n">1</span>
+        <div>
+          <p class="step__title">Jev leyó la llamada</p>
+          <p class="step__body">
+            Respondió que necesita <b>{{ cap.label }}</b>
+            @if (cap.probability !== null) {
+              con <b>{{ cap.probability | percent:'1.0-0' }}</b> de probabilidad
+            }
+            @if (cap.confidence !== null) {
+              y confianza <b>{{ cap.confidence | number:'1.2-2' }}</b>
+            }.
+          </p>
+        </div>
+      </li>
+
+      <li class="step">
+        <span class="step__n">2</span>
+        <div>
+          <p class="step__title">El código filtró los hospitales</p>
+          <p class="step__body">
+            De <b>{{ candidates().length }}</b> hospitales, se quedaron los que
+            tienen <b>{{ cap.label }}</b> y camas libres:
+            <b class="ok">{{ eligible().length }} aptos</b>,
+            <b class="ko">{{ rejected().length }} descartados</b>.
+          </p>
+        </div>
+      </li>
+
+      <li class="step">
+        <span class="step__n">3</span>
+        <div>
+          <p class="step__title">De los aptos, el más cercano</p>
+          <p class="step__body">
+            <b>{{ e.hospitalName }}</b>
+            @if (e.hospitalDistanceKm) { a <b>{{ e.hospitalDistanceKm }} km</b> }
+            del incidente. Se despachó <b>{{ e.ambulanceCode }}</b>.
+          </p>
+        </div>
+      </li>
+
+      @if (e.nearestOverruled; as n) {
+        <li class="step step--alert">
+          <span class="step__n">⚕</span>
+          <div>
+            <p class="step__title">Por qué no fue al más cercano</p>
+            <p class="step__body">
+              <b>{{ n.name }}</b> estaba a solo <b>{{ n.distanceKm }} km</b>,
+              pero {{ n.reason | lowercase }}. Mandarlo ahí habría costado un
+              traslado adicional.
+            </p>
+          </div>
+        </li>
+      }
+    </ol>
+  }
+
+  <p class="rule">
+    Prioridad <b>{{ e.priority ?? '—' }}</b> por la regla
+    <code>{{ e.ruleFired ?? '—' }}</code> · despacho calculado en
+    <b>{{ e.dispatchLatencyMs ?? 0 }} ms</b>
+  </p>
+
+  @if (e.rationale) { <p class="rationale">{{ e.rationale }}</p> }
+  @if (e.blockedReason) { <p class="blocked">⚠ {{ e.blockedReason }}</p> }
+
+  <!-- ── CADA HOSPITAL, CON SU MOTIVO ── -->
+  @if (candidates().length) {
+    <section class="cands">
+      <h3>
+        Los {{ candidates().length }} hospitales, por distancia
+        <button type="button" class="explain-btn" (click)="modalOpen.set(true)">
+          ¿cómo se eligió?
+        </button>
+      </h3>
+      <ul>
+        @for (c of candidates(); track c.code) {
+          <li class="cand"
+              [class.cand--chosen]="c.code === e.hospitalCode"
+              [class.cand--rejected]="!c.eligible">
+            <span class="cand__dist">{{ c.distanceKm | number:'1.1-1' }} km</span>
+            <span class="cand__name">{{ c.name }}</span>
+            @if (c.code === e.hospitalCode) {
+              <span class="cand__mark cand__mark--ok">elegido</span>
+            } @else if (c.rejectedReason) {
+              <span class="cand__mark cand__mark--ko">{{ c.rejectedReason }}</span>
+            } @else {
+              <span class="cand__mark">apto, pero más lejos</span>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+  @if (modalOpen()) {
+    <app-dispatch-explain-modal [emergency]="e" (closed)="modalOpen.set(false)" />
+  }
+} @else {
+  <p class="empty">Sin despacho todavía.</p>
+}

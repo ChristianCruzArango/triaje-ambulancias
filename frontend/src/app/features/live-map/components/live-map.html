@@ -1,0 +1,10 @@
+<div #mapHost class="map"></div>
+
+@if (failed()) {
+  <div class="map-overlay">
+    <p class="map-overlay__title">No se pudo cargar Google Maps</p>
+    <p class="map-overlay__hint">Revisa la clave y sus restricciones en Google Cloud Console.</p>
+  </div>
+} @else if (!ready()) {
+  <div class="map-overlay"><p class="map-overlay__title">Cargando mapa…</p></div>
+}

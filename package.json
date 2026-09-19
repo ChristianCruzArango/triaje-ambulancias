@@ -1,0 +1,15 @@
+{
+  "name": "triaje-ambulancias",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Triaje de emergencias y despacho de ambulancias en Cali con Angular, NestJS, Jev y OpenRouter (demostración)",
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "backend": "npm --prefix backend run start:dev",
+    "frontend": "npm --prefix frontend start",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build"
+  }
+}

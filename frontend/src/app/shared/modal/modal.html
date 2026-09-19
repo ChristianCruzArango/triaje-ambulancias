@@ -1,0 +1,17 @@
+<dialog #dialog class="dialog" (close)="onClose()" (click)="onBackdropClick($event)">
+  <div class="sheet">
+    <header class="sheet__head">
+      <div>
+        <h2 class="sheet__title">{{ title() }}</h2>
+        @if (subtitle()) { <p class="sheet__sub">{{ subtitle() }}</p> }
+      </div>
+      <button type="button" class="sheet__close" (click)="onClose()" aria-label="Cerrar">
+        Cerrar ✕
+      </button>
+    </header>
+
+    <div class="sheet__body">
+      <ng-content />
+    </div>
+  </div>
+</dialog>

@@ -1,0 +1,163 @@
+<app-modal
+  title="La petición a Jev, completa"
+  [subtitle]="assessment().model + ' · ' + assessment().latencyMs + ' ms'"
+  (closed)="closed.emit()">
+
+  <!-- ── 1. DE DÓNDE SALE ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">1 · De dónde sale todo esto</h3>
+    <dl class="kv">
+      <dt>Las nueve preguntas</dt>
+      <dd><code>{{ assessment().endpoint.questionsSource }}</code></dd>
+      <dt>El cliente que las envía</dt>
+      <dd><code>{{ assessment().endpoint.clientSource }}</code></dd>
+      <dt>Documentación del API</dt>
+      <dd><a [href]="assessment().endpoint.docs" target="_blank" rel="noopener">{{ assessment().endpoint.docs }}</a></dd>
+    </dl>
+    <p class="ins-note">
+      Las preguntas son constantes en el repositorio. No se generan, no las
+      escribe un modelo: están escritas a mano y se revisan como cualquier
+      código.
+    </p>
+  </section>
+
+  <!-- ── 2. LA PETICIÓN HTTP ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">2 · Cómo se envía al modelo</h3>
+    <pre class="ins-code ins-code--highlight">{{ assessment().endpoint.method }} {{ assessment().endpoint.url }}
+{{ headersText() }}</pre>
+    <p class="ins-note">
+      La clave viaja en la cabecera y nunca sale del backend. El SDK
+      <code>&#64;typesafe-ai/sdk</code> reintenta con espera creciente si la API
+      responde 429 o 5xx.
+    </p>
+  </section>
+
+  <!-- ── 3. EL CUERPO ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">3 · El JSON que se envía</h3>
+    <p class="ins-note">
+      Texto de la llamada: «{{ reportText() }}»
+    </p>
+    <pre class="ins-code">{{ requestBody() }}</pre>
+
+    <!-- Qué significa cada campo del JSON de arriba -->
+    <div class="gloss">
+      <p class="gloss__intro">Qué es cada campo:</p>
+
+      <dl>
+        <dt><code>model</code></dt>
+        <dd>
+          Qué modelo responde. <code>jev-latest</code> es un alias que apunta
+          siempre a la última versión estable — hoy <code>jev-1.13.0</code>.
+        </dd>
+
+        <dt><code>state</code></dt>
+        <dd>
+          <b>Los datos que se juzgan.</b> Todas las preguntas se evalúan contra
+          este mismo estado. Cuanto menos ruido tenga, más acierta.
+        </dd>
+
+        <dt class="gloss__child"><code>reportText</code></dt>
+        <dd class="gloss__child">
+          El texto de la llamada, tal cual. Es un <b>dato</b>, no una
+          instrucción: va dentro del objeto, nunca pegado a las preguntas.
+        </dd>
+
+        <dt class="gloss__child"><code>source</code></dt>
+        <dd class="gloss__child">
+          De dónde llegó: voz transcrita, formulario o remisión.
+        </dd>
+
+        <dt><code>questions</code></dt>
+        <dd>
+          <b>Las preguntas.</b> La clave de cada una
+          (<code>stroke_signs</code>, <code>severe_bleeding</code>…) la elige
+          quien programa, y la respuesta vuelve bajo esa misma clave. Se
+          evalúan <b>todas en paralelo</b>: nueve cuestan lo mismo que una.
+        </dd>
+
+        <dt class="gloss__child"><code>type</code></dt>
+        <dd class="gloss__child">
+          Qué clase de respuesta se quiere. Aquí se usan dos:
+          <br><b>choice</b> — elige una opción de una lista y devuelve la
+          probabilidad de cada una más una confianza.
+          <br><b>noul</b> — responde qué tan cierta es una afirmación, con un
+          número de 0 a 1. <b>No trae confianza propia.</b>
+          <br>(Existe un tercero, <b>score</b>, para puntuar sobre una escala.
+          Este proyecto no lo usa.)
+        </dd>
+
+        <dt class="gloss__child"><code>instructions</code></dt>
+        <dd class="gloss__child">
+          La pregunta en sí. jev-1.13 responde <b>literalmente</b> lo que dice
+          aquí, no lo que se quiso decir.
+        </dd>
+
+        <dt class="gloss__child"><code>criteria</code></dt>
+        <dd class="gloss__child">
+          Qué significa cada respuesta posible. En un <b>choice</b>, una
+          descripción por opción. En un <b>noul</b>, qué cuenta como
+          <code>true</code> y qué como <code>false</code> — y tienen que estar
+          alineados con la pregunta: un noul cuyo <code>true</code> signifique
+          «no» rinde peor.
+        </dd>
+      </dl>
+
+      <p class="gloss__foot">
+        Fuera de esto no viaja nada más. Sin nombre del paciente, sin
+        dirección, sin hora, sin historial.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ── 4. LA RESPUESTA ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">4 · El JSON que responde</h3>
+    <pre class="ins-code">{{ responseBody() }}</pre>
+    <p class="ins-note">
+      Cada respuesta lleva el valor en una clave con el nombre de su tipo:
+      <code>choice</code> trae <code>choice</code> + <code>probabilities</code> +
+      <code>confidence</code>; <code>noul</code> trae solo <code>noul</code>,
+      <b>sin confianza propia</b>.
+    </p>
+  </section>
+
+  <!-- ── 5. CÓMO SE CALCULA LA CONFIANZA ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">5 · De dónde sale la confianza</h3>
+    <p class="ins-note">
+      La <b>confianza no es una opinión del modelo</b>: es una estadística
+      calculada sobre la distribución de probabilidades que él mismo devolvió.
+    </p>
+    <p class="ins-note">
+      Si la probabilidad se concentra en una opción, la confianza es alta. Si
+      se reparte entre varias, es baja — y eso significa que ninguna opción
+      gana con claridad. TypeSafe la calcula y la devuelve ya hecha, pero
+      entrega también las probabilidades completas por si se quiere usar otra
+      medida.
+    </p>
+    <p class="ins-note">
+      En este proyecto, por debajo de <b>0,55</b> el caso NO se despacha solo:
+      va a revisión humana. Los umbrales están en
+      <code>backend/src/jev/constants/triage-thresholds.constant.ts</code> y
+      <b>deben calibrarse con casos reales etiquetados por personal clínico</b>.
+    </p>
+  </section>
+
+  <!-- ── 6. LO QUE COSTÓ ── -->
+  <section class="ins-block">
+    <h3 class="ins-title">6 · Lo que costó esta llamada</h3>
+    <div class="cost">
+      <span><b>{{ assessment().latencyMs | number }}</b> ms</span>
+      <span><b>{{ assessment().inputTokens | number }}</b> tokens de entrada</span>
+      <span><b>{{ assessment().costUsd | cost }}</b></span>
+    </div>
+    <p class="ins-note">
+      Jev cobra <b>0,042 USD por millón de tokens</b> y <b>solo los de
+      entrada</b>: los de salida son gratis. Por eso nueve preguntas cuestan lo
+      mismo que una — se evalúan en paralelo contra el mismo estado.
+    </p>
+  </section>
+</app-modal>

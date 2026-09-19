@@ -1,0 +1,131 @@
+@if (emergency(); as e) {
+  @if (assessment(); as a) {
+    <!-- ── 1. TIEMPO Y COSTE, ARRIBA DEL TODO ── -->
+    <button type="button" class="head head--btn" (click)="modalOpen.set(true)">
+      <div class="head__time">
+        <span class="head__ms">{{ a.latencyMs | number }}<small>ms</small></span>
+        <span class="head__cap">Jev tardó en responder</span>
+      </div>
+      <div class="head__meta">
+        <span>{{ a.costUsd | cost }}</span>
+        <span>{{ a.inputTokens | number }} tokens</span>
+        <span class="head__model">{{ a.model }}</span>
+      </div>
+      <span class="head__more">ver la petición completa →</span>
+    </button>
+
+    @if (a.error) {
+      <p class="error">Jev no respondió: {{ a.error }}</p>
+    }
+
+    <!-- ── 2. QUÉ SE LE ENVÍA ── -->
+    <section class="sec">
+      <h3 class="ins-title">1 · Qué se le envía a Jev</h3>
+      <div class="sent">
+        <span class="sent__key">Texto de la llamada</span>
+        <p class="sent__quote">«{{ e.reportText }}»</p>
+        <span class="sent__key">Origen</span>
+        <p class="sent__val">{{ e.source === 'voz' ? 'Llamada de voz transcrita' : e.source }}</p>
+      </div>
+      <p class="ins-note">
+        Eso es todo lo que viaja. Sin nombre, sin dirección, sin hora: Jev solo
+        necesita el texto para juzgarlo, y cuanto menos ruido reciba, más acierta.
+      </p>
+    </section>
+
+    <!-- ── 3. LA PREGUNTA QUE ELIGE EL HOSPITAL ── -->
+    <section class="sec">
+      <h3 class="ins-title">2 · La pregunta que decide el hospital</h3>
+      <p class="q">{{ capabilityQuestion.question }}</p>
+
+      <div class="verdict">
+        <span class="verdict__val">{{ a.requiredCapabilityLabel }}</span>
+        <span class="verdict__conf">confianza {{ a.capabilityConfidence | number:'1.2-2' }}</span>
+      </div>
+
+      <p class="ins-note note--row">
+        Probabilidad que dio a cada opción:
+        <button type="button" class="inline-btn" (click)="modalOpen.set(true)">
+          ¿cómo se calcula?
+        </button>
+      </p>
+      @for (o of capabilityOptions(); track o.key) {
+        <div class="ins-bar" [class.ins-bar--chosen]="o.chosen">
+          <span class="ins-bar__label">{{ o.key }}</span>
+          <span class="ins-bar__track">
+            <span class="ins-bar__fill" [style.width.%]="o.value * 100"></span>
+          </span>
+          <span class="ins-bar__pct">{{ o.value | percent:'1.0-0' }}</span>
+        </div>
+      }
+    </section>
+
+    <!-- ── 4. LAS OCHO PREGUNTAS QUE DECIDEN LA PRIORIDAD ── -->
+    <section class="sec">
+      <h3 class="ins-title">
+        3 · Las ocho preguntas de alarma
+        <small>{{ raisedCount() }} activada{{ raisedCount() === 1 ? '' : 's' }}</small>
+      </h3>
+      <p class="ins-note">
+        Cada una devuelve un valor de 0 a 1. Por encima de {{ raisedThreshold }}
+        activa una regla del protocolo.
+      </p>
+
+      @for (f of flagAnswers(); track f.key) {
+        <div class="ans" [class.ans--on]="f.raised">
+          <span class="ans__q">{{ f.question }}</span>
+          <span class="ans__r">
+            <b>{{ f.reading }}</b>
+            <span class="ans__n">{{ f.value | number:'1.2-2' }}</span>
+          </span>
+        </div>
+      }
+    </section>
+
+    @if (modalOpen()) {
+      <app-jev-request-modal
+        [assessment]="a"
+        [reportText]="e.reportText"
+        (closed)="modalOpen.set(false)" />
+    }
+
+    <!-- ── 5. NOTA SOBRE EL IDIOMA ── -->
+    <details class="lang">
+      <summary>Las preguntas viajan en inglés — por qué</summary>
+      <p>
+        El inglés es el idioma principal de entrenamiento de Jev y donde más
+        acierta. Medido en este proyecto, un caso ambiguo pasó de
+        <b>0,73</b> a <b>0,96</b> de confianza al traducir las preguntas.
+        Arriba se muestran en español; lo que se envía no cambia.
+      </p>
+    </details>
+  } @else {
+    <!-- Mientras Jev piensa: el contador arranca en 0 y sube. -->
+    <div class="head head--waiting">
+      <div class="head__time">
+        <span class="head__ms head__ms--live">{{ elapsedMs() | number:'1.0-0' }}<small>ms</small></span>
+        <span class="head__cap">Esperando respuesta de Jev…</span>
+      </div>
+      <div class="head__meta">
+        <span class="dots"><i></i><i></i><i></i></span>
+      </div>
+    </div>
+
+    <section class="sec">
+      <h3 class="ins-title">1 · Qué se le envía a Jev</h3>
+      <div class="sent">
+        <span class="sent__key">Texto de la llamada</span>
+        <p class="sent__quote">«{{ e.reportText }}»</p>
+      </div>
+      <p class="ins-note">
+        Ya viajó. Las nueve preguntas se evalúan en paralelo contra este mismo
+        texto.
+      </p>
+    </section>
+  }
+} @else {
+  <div class="empty">
+    <p>Sin emergencia seleccionada.</p>
+    <p class="ins-note">Generá una llamada para ver la evaluación.</p>
+  </div>
+}

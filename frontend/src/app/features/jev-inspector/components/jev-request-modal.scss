@@ -1,0 +1,76 @@
+.kv {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.7rem; margin: 0;
+
+  dt { font-size: 0.6875rem; color: #64748b; white-space: nowrap; }
+  dd { margin: 0; font-size: 0.6875rem; }
+  code, a { color: #7dd3fc; font-size: 0.6875rem; }
+}
+
+.cost {
+  display: flex; gap: 1.2rem; flex-wrap: wrap;
+  padding: 0.6rem 0.75rem; border-radius: 8px;
+  background: rgba(148, 163, 184, 0.09);
+  font-size: 0.75rem; color: #94a3b8;
+  b { color: #f1f5f9; font: 700 0.95rem ui-monospace, monospace; }
+}
+
+/** Glosario de los campos del JSON. */
+.gloss {
+  margin-top: 0.8rem;
+  padding: 0.7rem 0.85rem;
+  border-left: 2px solid rgba(125, 211, 252, 0.45);
+  border-radius: 0 8px 8px 0;
+  background: rgba(56, 189, 248, 0.06);
+
+  &__intro {
+    margin: 0 0 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #7dd3fc;
+  }
+
+  dl { margin: 0; }
+
+  dt {
+    margin-top: 0.5rem;
+    code {
+      padding: 0.05rem 0.3rem;
+      border-radius: 3px;
+      background: rgba(148, 163, 184, 0.2);
+      color: #f1f5f9;
+      font: 700 0.6875rem ui-monospace, monospace;
+    }
+  }
+
+  dd {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: #94a3b8;
+
+    b { color: #e2e8f0; }
+    code {
+      padding: 0 0.2rem;
+      border-radius: 3px;
+      background: rgba(148, 163, 184, 0.14);
+      font-size: 0.6875rem;
+      color: #cbd5e1;
+    }
+  }
+
+  /** Campos anidados dentro de `state` y `questions`. */
+  &__child {
+    padding-left: 1rem;
+    border-left: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  &__foot {
+    margin: 0.8rem 0 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+    font-size: 0.6875rem;
+    color: #64748b;
+  }
+}

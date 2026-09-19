@@ -1,0 +1,25 @@
+<ul class="list">
+  @for (e of rows(); track e.id) {
+    <li class="row"
+        [class.row--selected]="e.id === selectedId()"
+        [class.row--critical]="e.priority === 'critica'"
+        (click)="select(e.id)">
+      <span class="row__dot"
+            [style.background]="priorityColors[priorityKey(e)]"
+            [title]="priorityLabels[priorityKey(e)]"></span>
+      <span class="row__main">
+        <span class="row__top">
+          <span class="row__code">{{ e.callCode }}</span>
+          <time>{{ e.createdAt | date:'HH:mm' }}</time>
+        </span>
+        <span class="row__addr">{{ e.addressLabel }}</span>
+        <span class="row__text">{{ e.reportText }}</span>
+      </span>
+      @if (e.nearestOverruled) {
+        <span class="row__flag" title="El hospital más cercano no era el correcto">⚕</span>
+      }
+    </li>
+  } @empty {
+    <li class="list__empty">Sin llamadas todavía.</li>
+  }
+</ul>

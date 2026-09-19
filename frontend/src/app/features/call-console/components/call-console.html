@@ -1,0 +1,74 @@
+<div class="actions">
+  <button type="button" class="btn btn--primary" (click)="generate()">
+    Generar llamada
+  </button>
+
+  @if (recognition.supported()) {
+    <button type="button" class="btn btn--mic"
+            [class.btn--recording]="recognition.listening()"
+            (click)="toggleMic()">
+      {{ recognition.listening() ? '⏹ Detener' : '🎤 Hablar' }}
+    </button>
+  }
+
+  <button type="button" class="btn btn--ghost" (click)="synthesis.toggle()"
+          [title]="synthesis.enabled() ? 'Silenciar audio' : 'Activar audio'">
+    {{ synthesis.enabled() ? '🔊' : '🔇' }}
+  </button>
+</div>
+
+<!-- ── CUADRO DE TRANSCRIPCIÓN ── -->
+<div class="transcript"
+     [class.transcript--live]="recognition.listening()"
+     [class.transcript--read]="readOnly()">
+  <span class="transcript__label">
+    Transcripción
+    <em>· {{ boxSource() }}</em>
+    @if (recognition.listening()) { <i class="dot"></i> }
+    @else if (synthesis.speaking()) { <i class="dot dot--blue"></i> }
+  </span>
+
+  @if (recognition.listening()) {
+    <p class="transcript__live">
+      {{ recognition.finalText() }}<em>{{ recognition.interimText() }}</em>
+      @if (!recognition.finalText() && !recognition.interimText()) {
+        <span class="transcript__hint">Hablá ahora…</span>
+      }
+    </p>
+  } @else {
+    <textarea class="transcript__edit" rows="3"
+              [disabled]="readOnly()"
+              [value]="boxText()"
+              (input)="onTextInput($event)"
+              placeholder="Dictá con el micrófono o escribí la emergencia aquí…"></textarea>
+  }
+
+  @if (readOnly() && current(); as c) {
+    <p class="transcript__from">📍 {{ c.addressLabel }}</p>
+  }
+</div>
+
+@if (readOnly()) {
+  <button type="button" class="btn btn--wide" (click)="startNew()">
+    Escribir una llamada nueva
+  </button>
+} @else if (!recognition.listening() && editedText().trim()) {
+  <div class="submit">
+    <select (change)="onAddressChange($event)">
+      <option value="">¿Dónde ocurre?</option>
+      @for (a of addresses(); track a.label) {
+        <option [value]="a.label">{{ a.label }}</option>
+      }
+    </select>
+    <button type="button" class="btn btn--primary"
+            [disabled]="!canSubmit()" (click)="submit()">
+      Despachar
+    </button>
+  </div>
+}
+
+@if (!recognition.supported()) {
+  <p class="warn">
+    Este navegador no soporta reconocimiento de voz. Usá Chrome, o escribí el texto.
+  </p>
+}
