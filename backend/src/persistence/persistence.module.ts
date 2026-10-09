@@ -13,6 +13,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         // En desarrollo se sincroniza el esquema; en producción se usan migraciones.
         synchronize: config.get<string>('nodeEnv') === 'development',
         migrations: [import.meta.dirname + '/migrations/*{.ts,.js}'],
+        // Fuera de desarrollo, las migraciones pendientes se aplican al arrancar.
+        migrationsRun: config.get<string>('nodeEnv') !== 'development',
         logging: false,
       }),
     }),

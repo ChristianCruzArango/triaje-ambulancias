@@ -8,6 +8,15 @@ y el despacho elige ambulancia y hospital. Todo en vivo sobre un mapa de Cali.
 > Un sistema que prioriza pacientes de verdad es un dispositivo médico regulado
 > y necesita validación clínica. Esto no lo es.
 
+## Enlaces
+
+- **Aplicación desplegada:** <https://ambulancias-cali.up.railway.app>
+- **API:** <https://backend-production-2bfbc.up.railway.app/health>
+- **Vídeo:** <https://www.youtube.com/watch?v=h7F0dxlej0w>
+- **Slides:** pendiente
+
+La aplicación **no tiene login**: se abre directamente la sala de control.
+
 ## Lo que demuestra
 
 Llega esta llamada:
@@ -106,6 +115,29 @@ npm run frontend       # http://localhost:4200
 copian plantillas que hay que rellenar. `TYPESAFE_API_KEY` se saca en
 <https://typesafe.ai>, `OPENROUTER_API_KEY` en <https://openrouter.ai/keys>, y
 la de Maps en Google Cloud Console habilitando *Maps JavaScript API*.
+
+## Despliegue
+
+Desplegado en **Railway**, un proyecto con tres servicios:
+
+| Servicio | Qué es | Variables |
+|---|---|---|
+| `Postgres` | PostgreSQL gestionado por Railway | — |
+| `backend` | NestJS (`npm run start:prod`) | `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `NODE_ENV=production`, `PORT`, `FRONTEND_ORIGIN`, `TYPESAFE_API_KEY`, `SIMULATOR_ENABLED=false`, `RAILPACK_START_CMD=npm run start:prod` |
+| `frontend` | Angular compilado y servido con `serve` | `API_URL`, `GOOGLE_MAPS_API_KEY`, `PORT`, `RAILPACK_BUILD_CMD=npm run build:railway`, `RAILPACK_START_CMD=npm run start:prod` |
+
+- En producción el backend **aplica las migraciones al arrancar**
+  (`backend/src/persistence/migrations/`); en desarrollo sincroniza el esquema.
+- El frontend genera `environment.production.ts` en el build con
+  `frontend/scripts/write-env.mjs`, a partir de `API_URL` y
+  `GOOGLE_MAPS_API_KEY`: los archivos de entorno reales no se versionan.
+
+Para desplegar desde la CLI:
+
+```bash
+railway up backend  --path-as-root -s backend
+railway up frontend --path-as-root -s frontend
+```
 
 ## Los datos
 
